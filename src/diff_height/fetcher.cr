@@ -49,6 +49,9 @@ class DiffHeight::Fetcher
     end
 
     puts "Avg distance for max iteration #{max_i} is #{distances.sum / distances.size}"
+    puts "Max distance for max iteration #{max_i} is #{distances.max}"
+    puts "Min distance for max iteration #{max_i} is #{distances.min}"
+
   end
 
   def make_it_so
