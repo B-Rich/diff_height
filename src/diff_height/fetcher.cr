@@ -17,10 +17,38 @@ class DiffHeight::Fetcher
     @x = 0
     @y = 0
 
+    @sleep = 0.1
+
     @resume_path = "resume.yml"
     @height_path = "height.csv"
 
     restore
+  end
+
+  property :max_iteration
+
+  def self.avg_distance_for_iteration_till(max_i, min_i = 2)
+    distance = 750_000
+    positions = Array(Int32).new
+    distances = Array(Int32).new
+    i = min_i
+
+    while i <= max_i
+      (0..i).each do |j|
+        pos = (distance.to_f * (j.to_f / i.to_f)).to_i
+        positions << pos unless positions.includes?(pos)
+      end
+
+      i += 1
+    end
+
+    positions = positions.sort
+
+    (1...positions.size).each do |i|
+      distances << positions[i] - positions[i - 1]
+    end
+
+    puts "Avg distance for max iteration #{max_i} is #{distances.sum / distances.size}"
   end
 
   def make_it_so
@@ -33,6 +61,7 @@ class DiffHeight::Fetcher
   end
 
   def make_iteration
+    puts "#{current_iteration_progress}% - #{@x}/#{@current_iteration}, #{@y}/#{@current_iteration}, max iteration #{@max_iteration}"
     point = current_point
     url = "http://mapa.ump.waw.pl/ump-www/cgi/point_alt.cgi?lon=#{point[1]}&lat=#{point[0]}"
 
@@ -49,6 +78,10 @@ class DiffHeight::Fetcher
       @lon_from + (@lon_diff * (@y.to_f / @current_iteration.to_f) ),
     ]
     return r
+  end
+
+  def current_iteration_progress
+    (100 * (@x + (@y * @current_iteration))) / (@current_iteration ** 2)
   end
 
   def increment_point
